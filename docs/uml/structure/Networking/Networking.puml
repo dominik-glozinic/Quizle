@@ -1,0 +1,115 @@
+@startuml QuizApp
+
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classFontSize 13
+skinparam classAttributeFontSize 12
+skinparam arrowFontSize 11
+skinparam linetype ortho
+
+' Basic Info
+
+package "External Classes" #EAF3DE{
+    class GameHostService {
+        - sessionRepo: SessionRepository
+        - server: LocalHttpServer
+        - discovery: NetworkDiscovery
+        - scorer: ScoringService
+        --
+        + createSession(quiz: Quiz): GameSession
+        + startGame(sessionId: String): Unit
+        + advanceToNextQuestion(sessionId: String): Unit
+        + closeCurrentQuestion(sessionId: String): Unit
+        + endGame(sessionId: String): Leaderboard
+        + kickPlayer(sessionId: String, playerId: String): Unit
+    }
+
+    class GamePlayerService {
+        - client: PlayerHttpClient
+        --
+        + joinGame(url: String, username: String): Result<Player>
+        + pollForQuestion(): Result<Question?>
+        + submitAnswer(questionId: String, answerId: String): Result<Unit>
+        + getLeaderboard(): Result<Leaderboard>
+    }
+
+    class ScoringService {
+        + MAX_POINTS: Int = 1000
+        + MIN_POINTS: Int = 100
+        --
+        + calculatePoints(answeredAtMs: Long, questionOpenedAtMs: Long, timerSeconds: Int, isCorrect: Boolean): Int
+        + buildLeaderboard(session: GameSession, answers: List<PlayerAnswer>): Leaderboard
+    }
+
+    class GameSession {
+        + sessionId: String
+        + quiz: Quiz
+        + hostIpAddress: String
+        + port: Int
+        + state: GameState
+        + currentQuestionIndex: Int
+        + startedAt: Long?
+        ──
+        + getJoinUrl(): String
+        + getCurrentQuestion(): Question?
+        + advance(): Unit
+        + isFinished(): Boolean
+    }
+}
+
+' Network Layer
+
+package "Network" #E6F1FB {
+
+    class LocalHttpServer {
+        - port: Int
+        - server: NanoHTTPD
+        - session: GameSession
+        --
+        + start(): Unit
+        + stop(): Unit
+        + broadcastQuestion(q: Question): Unit
+        + broadcastLeaderboard(lb: Leaderboard): Unit
+        - handleJoin(req: Request): Response
+        - handleSubmitAnswer(req: Request): Response
+        - handlePoll(req: Request): Response
+    }
+
+    class NetworkDiscovery {
+        --
+        + getLocalIpAddress(): String
+        + buildJoinUrl(ip: String, port: Int, sessionId: String): String
+        + generateQrCode(url: String): Bitmap
+    }
+
+    class PlayerHttpClient {
+        - serverUrl: String
+        --
+        + join(username: String): Result<Player>
+        + pollGameState(): Result<GameStateDto>
+        + submitAnswer(questionId: String, answerId: String): Result<Unit>
+        + fetchLeaderboard(): Result<List<LeaderboardEntry>>
+    }
+
+    class MessageSerializer {
+        --
+        + toJson(obj: Any): String
+        + fromJson<T>(json: String, cls: Class<T>): T
+    }
+}
+
+' Relations
+LocalHttpServer --> MessageSerializer
+PlayerHttpClient --> MessageSerializer
+LocalHttpServer o-- GameSession
+
+GameHostService --> LocalHttpServer
+GameHostService --> NetworkDiscovery
+GamePlayerService --> PlayerHttpClient
+
+@enduml
+
+
+

@@ -1,0 +1,128 @@
+@startuml Networking
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classBackgroundColor #F8F8F8
+skinparam classBorderColor #888888
+skinparam arrowColor #555555
+skinparam defaultFontName Arial
+skinparam classFontSize 13
+skinparam classAttributeFontSize 12
+skinparam arrowFontSize 11
+skinparam linetype ortho
+
+' Domain-Interfaces (Referenz aus quiz_app.puml)
+
+package "Domain-Interfaces (Referenz)" #F0F0F0 {
+    interface IHostNetwork {
+        + startServer(session: GameSession)
+        + stopServer()
+        + broadcastQuestion(q: Question)
+        + broadcastLeaderboard(lb: Leaderboard)
+    }
+
+    interface IPlayerNetwork {
+        + join(url: String, username: String): Result<Player>
+        + pollGameState(): Result<GameStateDto>
+        + submitAnswer(questionId: String, answerId: String): Result<Unit>
+        + fetchLeaderboard(): Result<Leaderboard>
+    }
+}
+
+' Services
+
+package "Services" #EAF3DE {
+    class GameHostService {
+        - sessionRepo: SessionRepository
+        - server: LocalHttpServer
+        - discovery: NetworkDiscovery
+        - scorer: ScoringService
+        --
+        + createSession(quiz: Quiz): GameSession
+        + startGame(sessionId: String)
+        + advanceToNextQuestion(sessionId: String)
+        + closeCurrentQuestion(sessionId: String)
+        + endGame(sessionId: String): Leaderboard
+        + kickPlayer(sessionId: String, playerId: String)
+    }
+
+    class GamePlayerService {
+        - client: PlayerHttpClient
+        --
+        + joinGame(url: String, username: String): Result<Player>
+        + pollForQuestion(): Result<Question?>
+        + submitAnswer(questionId: String, answerId: String): Result<Unit>
+        + getLeaderboard(): Result<Leaderboard>
+    }
+}
+
+class GameSession {
+    + sessionId: String
+    + hostIpAddress: String
+    + port: Int
+    + state: GameState
+    + currentQuestionIndex: Int
+    + startedAt: Long?
+    --
+    + getJoinUrl(): String
+    + getCurrentQuestion(): Question?
+    + advance()
+    + isFinished(): Boolean
+  }
+
+' Network Layer
+
+package "Network" #E6F1FB {
+    class LocalHttpServer {
+        - port: Int
+        - server: NanoHTTPD
+        - session: GameSession
+        --
+        + start()
+        + stop()
+        + broadcastQuestion(q: Question)
+        + broadcastLeaderboard(lb: Leaderboard)
+        - handleJoin(req: Request): Response
+        - handleSubmitAnswer(req: Request): Response
+        - handlePoll(req: Request): Response
+    }
+
+    class PlayerHttpClient {
+        - serverUrl: String
+        --
+        + join(username: String): Result<Player>
+        + pollGameState(): Result<GameStateDto>
+        + submitAnswer(questionId: String, answerId: String): Result<Unit>
+        + fetchLeaderboard(): Result<List<LeaderboardEntry>>
+    }
+
+    class MessageSerializer {
+        --
+        + toJson(obj: Any): String
+        + fromJson<T>(json: String, cls: Class<T>): T
+    }
+
+
+    class GameStateDto {
+        + state: String
+        + currentQuestion: Question?
+        + questionOpenedAtMs: Long?
+    }
+}
+
+' Realisierung: Services implementieren Domain-Interfaces
+IHostNetwork <|.. GameHostService
+IPlayerNetwork <|.. GamePlayerService
+
+' Interne Beziehungen
+GameHostService --> LocalHttpServer : uses
+GamePlayerService --> PlayerHttpClient : uses
+
+LocalHttpServer --> MessageSerializer : uses
+PlayerHttpClient --> MessageSerializer : uses
+LocalHttpServer o-- GameSession : manages
+
+@enduml
+
+
+

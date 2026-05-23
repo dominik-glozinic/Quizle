@@ -1,0 +1,277 @@
+@startuml quiz_app
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classBackgroundColor #F8F8F8
+skinparam classBorderColor #888888
+skinparam arrowColor #555555
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+title "<font size=40> Quizle! </font>"
+
+
+package "Darstellung" #add8e6c8 {
+
+  abstract class User {
+    - userId: String
+    - username: String
+    --
+    + getUsername(): String
+    + setUsername(name: String)
+  }
+
+  class Host {
+    - roomCode: String
+    --
+    + createSession(quiz: Quiz): GameSession
+    + startSession(sessionId: String)
+    + advanceToNextQuestion(sessionId: String)
+    + viewAnswers(): List<PlayerAnswer>
+    + displayResults(): Leaderboard
+  }
+
+  class Player {
+    --
+    + joinSession(url: String, username: String): Result<Player>
+    + pollForQuestion(): Result<Question?>
+    + submitAnswer(questionId: String, answerId: String): Result<Unit>
+    + viewFinalScores(): Result<Leaderboard>
+  }
+
+  class Quiz {
+    - quizId: String
+    - title: String
+    - description: String
+    --
+    + getQuestions(): List<Question>
+    + addQuestion(q: Question)
+  }
+
+  class GameSession {
+    + sessionId: String
+    + hostIpAddress: String
+    + port: Int
+    + state: GameState
+    + currentQuestionIndex: Int
+    + startedAt: Long?
+    --
+    + getJoinUrl(): String
+    + getCurrentQuestion(): Question?
+    + advance()
+    + isFinished(): Boolean
+  }
+
+  class Question {
+    - questionId: String
+    - quizId: String
+    - questionText: String
+    - timerSeconds: Int
+    --
+    + getText(): String
+    + getAnswers(): List<Answer>
+    + isCorrect(answerId: String): Boolean
+    + getTimeLimitSec(): Int
+  }
+
+  class Answer {
+    - answerId: String
+    - answerText: String
+    - isCorrect: Boolean
+    --
+    + getText(): String
+    + isCorrectAnswer(): Boolean
+  }
+
+  class PlayerAnswer {
+    - playerId: String
+    - questionId: String
+    - answerId: String
+    - answeredAtMs: Long
+    --
+    + isCorrect(): Boolean
+    + getTimestamp(): Long
+  }
+
+  class Leaderboard {
+    - entries: List<LeaderboardEntry>
+    --
+    + getRanking(): List<LeaderboardEntry>
+    + getWinner(): LeaderboardEntry
+  }
+
+  class LeaderboardEntry {
+    + playerId: String
+    + username: String
+    + score: Int
+  }
+
+  class ScoringService {
+    + MAX_POINTS: Int
+    + MIN_POINTS: Int
+    --
+    + calculatePoints(answeredAtMs: Long, questionOpenedAtMs: Long, timerSeconds: Int, isCorrect: Boolean): Int
+    + buildLeaderboard(session: GameSession, answers: List<PlayerAnswer>): Leaderboard
+  }
+
+  enum GameState {
+    WAITING
+    ACTIVE
+    PAUSED
+    FINISHED
+  }
+
+  interface IHostNetwork {
+    + startServer(session: GameSession)
+    + stopServer()
+    + broadcastQuestion(q: Question)
+    + broadcastLeaderboard(lb: Leaderboard)
+  }
+
+  interface IPlayerNetwork {
+    + join(url: String, username: String): Result<Player>
+    + pollGameState(): Result<GameStateDto>
+    + submitAnswer(questionId: String, answerId: String): Result<Unit>
+    + fetchLeaderboard(): Result<Leaderboard>
+  }
+}
+
+
+
+package "Netzwerk" #59ff4398 {
+
+  class LocalHttpServer {
+    - port: Int
+    - server: NanoHTTPD
+    - session: GameSession
+    --
+    + start()
+    + stop()
+    + broadcastQuestion(q: Question)
+    + broadcastLeaderboard(lb: Leaderboard)
+    - handleJoin(req: Request): Response
+    - handleSubmitAnswer(req: Request): Response
+    - handlePoll(req: Request): Response
+  }
+
+  class PlayerHttpClient {
+    - serverUrl: String
+    --
+    + join(username: String): Result<Player>
+    + pollGameState(): Result<GameStateDto>
+    + submitAnswer(questionId: String, answerId: String): Result<Unit>
+    + fetchLeaderboard(): Result<List<LeaderboardEntry>>
+  }
+
+  class MessageSerializer {
+    --
+    + toJson(obj: Any): String
+    + fromJson<T>(json: String, cls: Class<T>): T
+  }
+
+  class GameStateDto {
+    + state: String
+    + currentQuestion: Question?
+    + questionOpenedAtMs: Long?
+  }
+}
+
+
+
+package "Persistenz" #f5deb3c8 {
+
+  class QuizDatabase <<@Database>> {
+    + getInstance(context: Context): QuizDatabase
+    --
+    + quizDao(): RoomQuizDao
+  }
+
+  interface QuizRepository {
+    + insertQuiz(quiz: QuizEntity)
+    + getAllQuizzes(): List<QuizEntity>
+    + getQuizById(id: String): QuizEntity
+    + deleteQuiz(quiz: QuizEntity)
+    + insertQuestions(questions: List<QuestionEntity>)
+    + getQuestionsForQuiz(quizId: String): List<QuestionEntity>
+  }
+
+  class RoomQuizDao <<@Dao>> {
+    + insertQuiz(quiz: QuizEntity)
+    + getAllQuizzes(): List<QuizEntity>
+    + getQuizById(id: String): QuizEntity
+    + deleteQuiz(quiz: QuizEntity)
+    + insertQuestions(questions: List<QuestionEntity>)
+    + getQuestionsForQuiz(quizId: String): List<QuestionEntity>
+  }
+
+  class QuizEntity <<@Entity>> {
+    + id: String <<@PrimaryKey>>
+    + title: String
+    + description: String
+    + createdAt: Long
+  }
+
+  class QuestionEntity <<@Entity>> {
+    + questionId: String <<@PrimaryKey>>
+    + quizId: String <<FK>>
+    + questionText: String
+    + timerSeconds: Int
+    + answers: String
+    ' answers stored as JSON string (List<Answer>)
+  }
+
+  class QuizRepositoryImpl {
+    - dao: RoomQuizDao
+    --
+    + insertQuiz(quiz: QuizEntity)
+    + getAllQuizzes(): List<QuizEntity>
+    + getQuizById(id: String): QuizEntity
+    + deleteQuiz(quiz: QuizEntity)
+    + insertQuestions(questions: List<QuestionEntity>)
+    + getQuestionsForQuiz(quizId: String): List<QuestionEntity>
+    + toQuiz(entity: QuizEntity, questions: List<QuestionEntity>): Quiz
+    + fromQuiz(quiz: Quiz): Pair<QuizEntity, List<QuestionEntity>>
+  }
+
+  QuizRepositoryImpl ..|> QuizRepository : implements
+  QuizRepositoryImpl --> RoomQuizDao : delegates to
+  QuizDatabase --> RoomQuizDao : provides
+  RoomQuizDao --> QuizEntity : reads/writes
+  RoomQuizDao --> QuestionEntity : reads/writes
+}
+
+
+
+' Inheritance
+User <|-- Host
+User <|-- Player
+
+' Domain associations
+Host ..> GameSession : creates
+Player ..> PlayerAnswer : submits
+Quiz "1" o-- "1..*" Question
+Question "1" o-- "4" Answer
+GameSession "1" o-- "0..*" PlayerAnswer
+GameSession --> GameState : uses
+
+' Services
+Host ..> IHostNetwork : uses
+Player ..> IPlayerNetwork : uses
+GameSession ..> ScoringService : uses
+ScoringService ..> Leaderboard : generates
+Leaderboard *-- LeaderboardEntry : contains
+
+' Network implementations
+LocalHttpServer ..|> IHostNetwork : implements
+PlayerHttpClient ..|> IPlayerNetwork : implements
+LocalHttpServer --> MessageSerializer : uses
+PlayerHttpClient --> MessageSerializer : uses
+LocalHttpServer o-- GameSession : manages
+
+' Persistence <-> Domain bridge
+QuizRepositoryImpl ..> Quiz : maps to/from
+QuizRepositoryImpl ..> QuizEntity : maps to/from
+QuizRepositoryImpl ..> QuestionEntity : maps to/from
+Host ..> QuizRepository : loads/saves quiz via
+
+@enduml
