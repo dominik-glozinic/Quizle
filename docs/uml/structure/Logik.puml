@@ -1,5 +1,4 @@
-@startuml quiz_app
-
+@startuml Darstellung
 skinparam classAttributeIconSize 0
 skinparam classFontStyle bold
 skinparam classBackgroundColor #F8F8F8
@@ -7,8 +6,6 @@ skinparam classBorderColor #888888
 skinparam arrowColor #555555
 skinparam linetype ortho
 skinparam packageStyle rectangle
-
-title "<font size=40> Quizle! </font>"
 
 
 package "Logik" #add8e6c8 {
@@ -136,112 +133,6 @@ package "Logik" #add8e6c8 {
   }
 }
 
-
-
-package "Netzwerk" #59ff4398 {
-
-  class LocalHttpServer {
-    - port: Int
-    - server: NanoHTTPD
-    - session: GameSession
-    --
-    + start()
-    + stop()
-    + broadcastQuestion(q: Question)
-    + broadcastLeaderboard(lb: Leaderboard)
-    - handleJoin(req: Request): Response
-    - handleSubmitAnswer(req: Request): Response
-    - handlePoll(req: Request): Response
-  }
-
-  class PlayerHttpClient {
-    - serverUrl: String
-    --
-    + join(username: String): Result<Player>
-    + pollGameState(): Result<GameStateDto>
-    + submitAnswer(questionId: String, answerId: String): Result<Unit>
-    + fetchLeaderboard(): Result<List<LeaderboardEntry>>
-  }
-
-  class MessageSerializer {
-    --
-    + toJson(obj: Any): String
-    + fromJson<T>(json: String, cls: Class<T>): T
-  }
-
-  class GameStateDto {
-    + state: String
-    + currentQuestion: Question?
-    + questionOpenedAtMs: Long?
-  }
-}
-
-
-
-package "Persistenz" #f5deb3c8 {
-
-  class QuizDatabase <<@Database>> {
-    + getInstance(context: Context): QuizDatabase
-    --
-    + quizDao(): RoomQuizDao
-  }
-
-  interface QuizRepository {
-    + insertQuiz(quiz: QuizEntity)
-    + getAllQuizzes(): List<QuizEntity>
-    + getQuizById(id: String): QuizEntity
-    + deleteQuiz(quiz: QuizEntity)
-    + insertQuestions(questions: List<QuestionEntity>)
-    + getQuestionsForQuiz(quizId: String): List<QuestionEntity>
-  }
-
-  class RoomQuizDao <<@Dao>> {
-    + insertQuiz(quiz: QuizEntity)
-    + getAllQuizzes(): List<QuizEntity>
-    + getQuizById(id: String): QuizEntity
-    + deleteQuiz(quiz: QuizEntity)
-    + insertQuestions(questions: List<QuestionEntity>)
-    + getQuestionsForQuiz(quizId: String): List<QuestionEntity>
-  }
-
-  class QuizEntity <<@Entity>> {
-    + id: String <<@PrimaryKey>>
-    + title: String
-    + description: String
-    + createdAt: Long
-  }
-
-  class QuestionEntity <<@Entity>> {
-    + questionId: String <<@PrimaryKey>>
-    + quizId: String <<FK>>
-    + questionText: String
-    + timerSeconds: Int
-    + answers: String
-    ' answers stored as JSON string (List<Answer>)
-  }
-
-  class QuizRepositoryImpl {
-    - dao: RoomQuizDao
-    --
-    + insertQuiz(quiz: QuizEntity)
-    + getAllQuizzes(): List<QuizEntity>
-    + getQuizById(id: String): QuizEntity
-    + deleteQuiz(quiz: QuizEntity)
-    + insertQuestions(questions: List<QuestionEntity>)
-    + getQuestionsForQuiz(quizId: String): List<QuestionEntity>
-    + toQuiz(entity: QuizEntity, questions: List<QuestionEntity>): Quiz
-    + fromQuiz(quiz: Quiz): Pair<QuizEntity, List<QuestionEntity>>
-  }
-
-  QuizRepositoryImpl ..|> QuizRepository : implements
-  QuizRepositoryImpl --> RoomQuizDao : delegates to
-  QuizDatabase --> RoomQuizDao : provides
-  RoomQuizDao --> QuizEntity : reads/writes
-  RoomQuizDao --> QuestionEntity : reads/writes
-}
-
-
-
 ' Inheritance
 User <|-- Host
 User <|-- Player
@@ -260,18 +151,4 @@ Player ..> IPlayerNetwork : uses
 GameSession ..> ScoringService : uses
 ScoringService ..> Leaderboard : generates
 Leaderboard *-- LeaderboardEntry : contains
-
-' Network implementations
-LocalHttpServer ..|> IHostNetwork : implements
-PlayerHttpClient ..|> IPlayerNetwork : implements
-LocalHttpServer --> MessageSerializer : uses
-PlayerHttpClient --> MessageSerializer : uses
-LocalHttpServer o-- GameSession : manages
-
-' Persistence implementations
-QuizRepositoryImpl ..> Quiz : maps to/from
-QuizRepositoryImpl ..> QuizEntity : maps to/from
-QuizRepositoryImpl ..> QuestionEntity : maps to/from
-Host ..> QuizRepository : loads/saves quiz via
-
 @enduml
