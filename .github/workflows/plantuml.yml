@@ -1,0 +1,22 @@
+name: Generate PlantUML diagrams
+
+on:
+  push:
+    paths:
+      
+'docs/uml/*/.puml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      
+name: Checkout repo
+      uses: actions/checkout@v4
+
+      
+name: Generate PlantUML diagrams
+      uses: grassedge/generate-plantuml-action@v1.5
+      with:
+        path: docs/uml
