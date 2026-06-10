@@ -6,12 +6,12 @@ data class LeaderboardEntry(
     val score: Int
 )
 
-class Leaderboard(
+data class Leaderboard(
     private val entries: List<LeaderboardEntry>
 ) {
-    fun getRanking(): List<LeaderboardEntry> = entries.sortedByDescending { it.score }
+    fun getRanking(): List<LeaderboardEntry> =
+        entries.sortedByDescending { it.score }
 
-    fun getWinner(): LeaderboardEntry {
-        return getRanking().first()
-    }
+    fun getWinner(): LeaderboardEntry =
+        getRanking().first()
 }

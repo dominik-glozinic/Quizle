@@ -1,19 +1,15 @@
 package com.example.quizle.logic
 
-class Question(
-    private val questionId: String,
-    private val quizId: String,
-    private val questionText: String,
-    private val timerSeconds: Int,
-    private val answers: List<Answer> = emptyList()
+data class Question(
+    val questionId: String,
+    val quizId: String,
+    val questionText: String,
+    val timerSeconds: Int,
+    private val answers: List<Answer>
 ) {
     fun getText(): String = questionText
-
     fun getAnswers(): List<Answer> = answers
-
-    fun isCorrect(answerId: String): Boolean {
-        TODO("Not yet implemented")
-    }
-
     fun getTimeLimitSec(): Int = timerSeconds
+    fun isCorrect(answerId: String): Boolean =
+        answers.any { it.answerId == answerId && it.isCorrect }
 }

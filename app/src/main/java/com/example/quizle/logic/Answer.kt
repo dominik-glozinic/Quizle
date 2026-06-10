@@ -1,10 +1,11 @@
 package com.example.quizle.logic
 
-class Answer(
-    private val answerId: String,
-    private val answerText: String,
-    private val isCorrect: Boolean
+data class Answer(
+    val answerId: String,
+    val answerText: String,
+    val isCorrect: Boolean
 ) {
     fun getText(): String = answerText
     fun isCorrectAnswer(): Boolean = isCorrect
 }
+

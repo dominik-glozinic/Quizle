@@ -1,14 +1,12 @@
 package com.example.quizle.logic
 
-class PlayerAnswer(
-    private val playerId: String,
-    private val questionId: String,
-    private val answerId: String,
-    private val answeredAtMs: Long
+data class PlayerAnswer(
+    val playerId: String,
+    val questionId: String,
+    val answerId: String,
+    val answeredAtMs: Long
 ) {
-    fun isCorrect(): Boolean {
-        TODO("Not yet implemented")
-    }
-
+    // isCorrect is resolved by ScoringService against the Question — not stored here,
+    // since the answer key lives in the Question object on the host side.
     fun getTimestamp(): Long = answeredAtMs
 }
