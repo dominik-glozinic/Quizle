@@ -22,4 +22,12 @@ interface RoomQuizDao {
 
     @Query("SELECT * FROM questions WHERE quizId = :quizId")
     fun getQuestionsForQuiz(quizId: String): List<QuestionEntity>
+
+    /**
+     * Deletes all questions belonging to a quiz.
+     * Called by [QuizRepositoryImpl.removeQuiz] before deleting the quiz row,
+     * since Room doesn't enforce FK cascades unless explicitly configured.
+     */
+    @Query("DELETE FROM questions WHERE quizId = :quizId")
+    fun deleteQuestionsByQuizId(quizId: String)
 }

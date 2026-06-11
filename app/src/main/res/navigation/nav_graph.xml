@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/startScreen">
+    <fragment
+        android:id="@+id/startScreen"
+        android:name="com.example.quizle.startScreen"
+        android:label="fragment_start_screen"
+        tools:layout="@layout/fragment_start_screen" >
+        <action
+            android:id="@+id/action_startScreen_to_hostOptions"
+            app:destination="@id/hostOptions" />
+    </fragment>
+    <fragment
+        android:id="@+id/hostOptions"
+        android:name="com.example.quizle.hostOptions"
+        android:label="fragment_host_options"
+        tools:layout="@layout/fragment_host_options" />
+</navigation>

@@ -19,3 +19,14 @@ interface IPlayerNetwork {
     fun submitAnswer(questionId: String, answerId: String): Result<Unit>
     fun fetchLeaderboard(): Result<Leaderboard>
 }
+
+/**
+ * A no-op implementation of [IPlayerNetwork] for cases where a Player object
+ * is used as a data container (e.g. on the Host side) rather than an active client.
+ */
+class StubPlayerNetwork : IPlayerNetwork {
+    override fun join(url: String, username: String) = Result.failure<Player>(UnsupportedOperationException())
+    override fun pollGameState() = Result.failure<GameStateDto>(UnsupportedOperationException())
+    override fun submitAnswer(questionId: String, answerId: String) = Result.failure<Unit>(UnsupportedOperationException())
+    override fun fetchLeaderboard() = Result.failure<Leaderboard>(UnsupportedOperationException())
+}
