@@ -17,13 +17,9 @@ package com.example.quizle.test
 import com.example.quizle.logic.*
 import com.example.quizle.network.LocalHttpServer
 import com.example.quizle.network.PlayerHttpClient
-import org.junit.Test
 
-class NetworkIntegrationTest {
-
-    @Test
-    fun testNetworkIntegration() {
-        println("=== Quizle Network Integration Test ===\n")
+fun main() {
+    println("=== Quizle Network Integration Test ===\n")
 
     // ── 1. Build a sample quiz ────────────────────────────────────────────────
     val quiz = Quiz(title = "Geography Quiz")
@@ -58,16 +54,16 @@ class NetworkIntegrationTest {
     println("[OK] Quiz built: '${quiz.title}' with ${quiz.getQuestions().size} questions")
 
     // ── 2. Host creates and starts a session ──────────────────────────────────
-    val server = LocalHttpServer(port = 8888)
+    val server = LocalHttpServer(port = 8080)
     val host = Host(username = "HostUser", network = server)
-    val session = host.createSession(quiz)
-    println("[OK] Server started on port 8888  (join URL: ${session.getJoinUrl()})")
+    val session = host.createSession(quiz, port = 8080)
+    println("[OK] Server started on port 8080  (join URL: ${session.getJoinUrl()})")
 
     Thread.sleep(200) // give NanoHTTPD a moment to bind
 
     // ── 3. Player joins ───────────────────────────────────────────────────────
-    val client = PlayerHttpClient(serverUrl = "http://127.0.0.1:8888")
-    val joinResult = client.join(url = "http://127.0.0.1:8888", username = "Domy")
+    val client = PlayerHttpClient(serverUrl = "http://localhost:8080")
+    val joinResult = client.join(url = "http://localhost:8080", username = "Domy")
     check(joinResult.isSuccess) { "join() failed: ${joinResult.exceptionOrNull()}" }
     val player = joinResult.getOrThrow()
     println("[OK] Player joined: id=${player.userId}, username=${player.getUsername()}")
@@ -121,5 +117,4 @@ class NetworkIntegrationTest {
     // ── 10. Cleanup ───────────────────────────────────────────────────────────
     server.stopServer()
     println("\n[OK] Server stopped — all checks passed ✓")
-}
 }

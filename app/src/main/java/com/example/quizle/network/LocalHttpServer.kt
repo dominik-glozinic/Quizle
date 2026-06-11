@@ -23,9 +23,10 @@ import java.io.IOException
  *  GET  /leaderboard → 200 { Leaderboard JSON } | 404 if not yet available
  */
 class LocalHttpServer(
-    private val port: Int,
-    private val session: GameSession
+    private val port: Int
 ) : IHostNetwork {
+
+    private var session: GameSession? = null
 
     private val serializer = MessageSerializer()
 
@@ -41,6 +42,7 @@ class LocalHttpServer(
     // ── IHostNetwork ────────────────────────────────────────────────────────
 
     override fun startServer(session: GameSession) {
+        this.session = session
         nano = object : NanoHTTPD(port) {
             override fun serve(httpSession: IHTTPSession): Response {
                 return try {
@@ -110,11 +112,12 @@ class LocalHttpServer(
         }
 
         // Only allow joining while waiting
-        if (session.state != GameState.WAITING) {
+        val s = session ?: return errorResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "Server not initialized")
+        if (s.state != GameState.WAITING) {
             return errorResponse(NanoHTTPD.Response.Status.valueOf("409 Conflict"), "Session already started")
         }
 
-        val player = session.registerPlayer(joinRequest.username)
+        val player = s.registerPlayer(joinRequest.username)
         return okResponse(player)
     }
 
@@ -139,7 +142,7 @@ class LocalHttpServer(
             answeredAtMs = System.currentTimeMillis()
         )
 
-        session.recordAnswer(playerAnswer)
+        session?.recordAnswer(playerAnswer)
         return okResponse(ApiResponseDto(success = true))
     }
 

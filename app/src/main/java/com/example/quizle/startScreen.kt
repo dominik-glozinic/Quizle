@@ -39,11 +39,12 @@ class startScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val startButton = view.findViewById<android.widget.Button>(R.id.hostButton)
+        view.findViewById<android.widget.Button>(R.id.hostButton).setOnClickListener {
+            findNavController().navigate(R.id.action_startScreen_to_quizList)
+        }
 
-        startButton.setOnClickListener {
-            androidx.navigation.fragment.NavHostFragment.findNavController(this)
-                .navigate(R.id.action_startScreen_to_hostOptions)
+        view.findViewById<android.widget.Button>(R.id.userButton).setOnClickListener {
+            findNavController().navigate(R.id.action_startScreen_to_join)
         }
     }
 

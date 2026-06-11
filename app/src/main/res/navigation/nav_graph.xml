@@ -4,18 +4,74 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/startScreen">
-    <fragment
-        android:id="@+id/startScreen"
+
+    <fragment android:id="@+id/startScreen"
         android:name="com.example.quizle.startScreen"
-        android:label="fragment_start_screen"
-        tools:layout="@layout/fragment_start_screen" >
-        <action
-            android:id="@+id/action_startScreen_to_hostOptions"
-            app:destination="@id/hostOptions" />
+        tools:layout="@layout/fragment_start_screen">
+        <action android:id="@+id/action_startScreen_to_quizList"
+            app:destination="@id/quizListFragment" />
+        <action android:id="@+id/action_startScreen_to_join"
+            app:destination="@id/joinFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/hostOptions"
-        android:name="com.example.quizle.hostOptions"
-        android:label="fragment_host_options"
-        tools:layout="@layout/fragment_host_options" />
+
+    <fragment android:id="@+id/quizListFragment"
+        android:name="com.example.quizle.QuizListFragment"
+        tools:layout="@layout/fragment_quiz_list">
+        <action android:id="@+id/action_quizList_to_createQuiz"
+            app:destination="@id/createQuizFragment" />
+        <action android:id="@+id/action_quizList_to_hostLobby"
+            app:destination="@id/hostLobbyFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/createQuizFragment"
+        android:name="com.example.quizle.CreateQuizFragment"
+        tools:layout="@layout/fragment_create_quiz">
+        <action android:id="@+id/action_createQuiz_to_addQuestion"
+            app:destination="@id/addQuestionFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/addQuestionFragment"
+        android:name="com.example.quizle.AddQuestionFragment"
+        tools:layout="@layout/fragment_add_question" />
+
+    <fragment android:id="@+id/hostLobbyFragment"
+        android:name="com.example.quizle.HostLobbyFragment"
+        tools:layout="@layout/fragment_host_lobby">
+        <argument android:name="quizId" app:argType="string" />
+        <action android:id="@+id/action_hostLobby_to_hostGame"
+            app:destination="@id/hostGameFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/hostGameFragment"
+        android:name="com.example.quizle.HostGameFragment"
+        tools:layout="@layout/fragment_host_game">
+        <action android:id="@+id/action_hostGame_to_leaderboard"
+            app:destination="@id/leaderboardFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/joinFragment"
+        android:name="com.example.quizle.JoinFragment"
+        tools:layout="@layout/fragment_join">
+        <action android:id="@+id/action_join_to_username"
+            app:destination="@id/usernameFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/usernameFragment"
+        android:name="com.example.quizle.UsernameFragment"
+        tools:layout="@layout/fragment_username">
+        <action android:id="@+id/action_username_to_playerGame"
+            app:destination="@id/playerGameFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/playerGameFragment"
+        android:name="com.example.quizle.PlayerGameFragment"
+        tools:layout="@layout/fragment_player_game">
+        <action android:id="@+id/action_playerGame_to_leaderboard"
+            app:destination="@id/leaderboardFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/leaderboardFragment"
+        android:name="com.example.quizle.LeaderboardFragment"
+        tools:layout="@layout/fragment_leaderboard" />
+
 </navigation>

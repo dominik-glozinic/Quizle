@@ -24,7 +24,7 @@ abstract class QuizDatabase : RoomDatabase() {
                     context.applicationContext,
                     QuizDatabase::class.java,
                     "quizle_database"
-                ).build().also { INSTANCE = it }
+                ).allowMainThreadQueries().build().also { INSTANCE = it }
             }
         }
     }
