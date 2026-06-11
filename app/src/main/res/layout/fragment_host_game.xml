@@ -3,9 +3,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center">
+    android:padding="16dp"
+    android:gravity="center_horizontal">
+
     <TextView
+        android:id="@+id/tvHostQuestionText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Question text will appear here"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"/>
+
+    <TextView
+        android:id="@+id/tvPlayerCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Host Game Screen"/>
+        android:text="Players connected: 0"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnNextQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Next Question"/>
+
 </LinearLayout>

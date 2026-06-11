@@ -72,6 +72,11 @@
 
     <fragment android:id="@+id/leaderboardFragment"
         android:name="com.example.quizle.LeaderboardFragment"
-        tools:layout="@layout/fragment_leaderboard" />
+        tools:layout="@layout/fragment_leaderboard">
+        <action android:id="@+id/action_leaderboard_to_startScreen"
+            app:destination="@id/startScreen"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
 
 </navigation>

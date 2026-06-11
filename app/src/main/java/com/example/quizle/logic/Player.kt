@@ -1,6 +1,7 @@
 package com.example.quizle.logic
 
 import java.util.UUID
+import kotlin.jvm.Transient
 
 /**
  * Represents a quiz participant.
@@ -18,7 +19,7 @@ import java.util.UUID
 class Player(
     userId: String = UUID.randomUUID().toString(),
     username: String,
-    private val network: IPlayerNetwork = StubPlayerNetwork()
+    @Transient private val network: IPlayerNetwork = StubPlayerNetwork()
 ) : User(userId = userId, username = username) {
 
     // ── IPlayerNetwork delegation ─────────────────────────────────────────────
