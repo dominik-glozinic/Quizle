@@ -6,7 +6,7 @@
     app:startDestination="@id/startScreen">
 
     <fragment android:id="@+id/startScreen"
-        android:name="com.example.quizle.startScreen"
+        android:name="com.example.quizle.ui.startScreen"
         tools:layout="@layout/fragment_start_screen">
         <action android:id="@+id/action_startScreen_to_quizList"
             app:destination="@id/quizListFragment" />
@@ -15,7 +15,7 @@
     </fragment>
 
     <fragment android:id="@+id/quizListFragment"
-        android:name="com.example.quizle.QuizListFragment"
+        android:name="com.example.quizle.ui.QuizListFragment"
         tools:layout="@layout/fragment_quiz_list">
         <action android:id="@+id/action_quizList_to_createQuiz"
             app:destination="@id/createQuizFragment" />
@@ -24,18 +24,18 @@
     </fragment>
 
     <fragment android:id="@+id/createQuizFragment"
-        android:name="com.example.quizle.CreateQuizFragment"
+        android:name="com.example.quizle.ui.CreateQuizFragment"
         tools:layout="@layout/fragment_create_quiz">
         <action android:id="@+id/action_createQuiz_to_addQuestion"
             app:destination="@id/addQuestionFragment" />
     </fragment>
 
     <fragment android:id="@+id/addQuestionFragment"
-        android:name="com.example.quizle.AddQuestionFragment"
+        android:name="com.example.quizle.ui.AddQuestionFragment"
         tools:layout="@layout/fragment_add_question" />
 
     <fragment android:id="@+id/hostLobbyFragment"
-        android:name="com.example.quizle.HostLobbyFragment"
+        android:name="com.example.quizle.ui.HostLobbyFragment"
         tools:layout="@layout/fragment_host_lobby">
         <argument android:name="quizId" app:argType="string" />
         <action android:id="@+id/action_hostLobby_to_hostGame"
@@ -43,35 +43,35 @@
     </fragment>
 
     <fragment android:id="@+id/hostGameFragment"
-        android:name="com.example.quizle.HostGameFragment"
+        android:name="com.example.quizle.ui.HostGameFragment"
         tools:layout="@layout/fragment_host_game">
         <action android:id="@+id/action_hostGame_to_leaderboard"
             app:destination="@id/leaderboardFragment" />
     </fragment>
 
     <fragment android:id="@+id/joinFragment"
-        android:name="com.example.quizle.JoinFragment"
+        android:name="com.example.quizle.ui.JoinFragment"
         tools:layout="@layout/fragment_join">
         <action android:id="@+id/action_join_to_username"
             app:destination="@id/usernameFragment" />
     </fragment>
 
     <fragment android:id="@+id/usernameFragment"
-        android:name="com.example.quizle.UsernameFragment"
+        android:name="com.example.quizle.ui.UsernameFragment"
         tools:layout="@layout/fragment_username">
         <action android:id="@+id/action_username_to_playerGame"
             app:destination="@id/playerGameFragment" />
     </fragment>
 
     <fragment android:id="@+id/playerGameFragment"
-        android:name="com.example.quizle.PlayerGameFragment"
+        android:name="com.example.quizle.ui.PlayerGameFragment"
         tools:layout="@layout/fragment_player_game">
         <action android:id="@+id/action_playerGame_to_leaderboard"
             app:destination="@id/leaderboardFragment" />
     </fragment>
 
     <fragment android:id="@+id/leaderboardFragment"
-        android:name="com.example.quizle.LeaderboardFragment"
+        android:name="com.example.quizle.ui.LeaderboardFragment"
         tools:layout="@layout/fragment_leaderboard">
         <action android:id="@+id/action_leaderboard_to_startScreen"
             app:destination="@id/startScreen"

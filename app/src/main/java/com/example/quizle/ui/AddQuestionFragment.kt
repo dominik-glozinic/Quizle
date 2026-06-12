@@ -1,4 +1,4 @@
-package com.example.quizle
+package com.example.quizle.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.RadioButton
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.quizle.R
 import com.example.quizle.logic.Answer
 import com.example.quizle.logic.Question
 import java.util.UUID
@@ -19,11 +20,10 @@ class AddQuestionFragment : Fragment() {
         inflater.inflate(R.layout.fragment_add_question, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Note: Manual check management is used instead of RadioGroup because
-        // RadioGroup expects its children to be direct children in the layout.
+
         setupSingleSelect(view)
 
-        // Pre-fill if editing
+
         arguments?.getSerializable("question")?.let { q ->
             q as Question
             view.findViewById<EditText>(R.id.etQuestion).setText(q.questionText)

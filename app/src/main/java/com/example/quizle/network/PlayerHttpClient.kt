@@ -10,14 +10,9 @@ import java.util.concurrent.TimeUnit
 /**
  * HTTP client used by the Player to communicate with the Host's [LocalHttpServer].
  *
- * Dependency (build.gradle):
- *   implementation("com.squareup.okhttp3:okhttp:4.12.0")
- *
- * All calls are synchronous and must be called from a background thread or coroutine
- * (e.g. viewModelScope.launch(Dispatchers.IO) { ... }).
- *
- * [serverUrl] example: "http://192.168.1.42:8080"
- * [playerId]  assigned by the server on /join; must be set before calling submitAnswer.
+ * [serverUrl] example: "http://192.168.1.42:8080" BUT only the IP part is important --> How to implement wiwth QR?
+ * [playerId]  assigned by the server. Required for answer submition. Currently multiple players with the sname name are allowed.
+ *              SHould that be changed?
  */
 class PlayerHttpClient(
     private val serverUrl: String
@@ -25,7 +20,6 @@ class PlayerHttpClient(
 
     private val serializer = MessageSerializer()
 
-    /** Set after a successful [join] call. Required for answer submission. */
     var playerId: String? = null
 
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
@@ -33,12 +27,9 @@ class PlayerHttpClient(
         .readTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    // ── IPlayerNetwork ───────────────────────────────────────────────────────
+    //IPlayerNetwork
 
-    /**
-     * POST /join
-     * Registers the player on the host server and stores the returned [Player.userId].
-     */
+
     override fun join(url: String, username: String): Result<Player> {
         val body = JoinRequestDto(username = username)
         return runCatching {
@@ -50,9 +41,8 @@ class PlayerHttpClient(
     }
 
     /**
-     * GET /poll
-     * Returns the current [GameStateDto]. The player should call this periodically
-     * (e.g. every 1 s) to detect when a new question has arrived or the game has finished.
+     * Returns the current [GameStateDto]
+     * Should be called every 1s maybe
      */
     override fun pollGameState(): Result<GameStateDto> = runCatching {
         val response = get("$serverUrl/poll")
@@ -62,7 +52,6 @@ class PlayerHttpClient(
     /**
      * POST /answer
      * Submits the player's chosen answer for the current question.
-     * Requires [playerId] to be set (i.e. [join] must have been called first).
      */
     override fun submitAnswer(questionId: String, answerId: String): Result<Unit> = runCatching {
         val pid = playerId
@@ -75,15 +64,14 @@ class PlayerHttpClient(
 
     /**
      * GET /leaderboard
-     * Fetches the final [Leaderboard] once the game has finished.
-     * Returns a failure if the server responds with 404 (not yet available).
+     * Fetches the final [Leaderboard] once the game has finished. --> Currently just a placeholder
      */
     override fun fetchLeaderboard(): Result<Leaderboard> = runCatching {
         val response = get("$serverUrl/leaderboard")
         serializer.fromJson(response, Leaderboard::class.java)
     }
 
-    // ── HTTP helpers ─────────────────────────────────────────────────────────
+    // HTTP helpers
 
     private fun get(url: String): String {
         val request = Request.Builder()
@@ -111,14 +99,14 @@ class PlayerHttpClient(
     }
 
     /**
-     * Executes a request and returns the body as a string.
-     * Throws [IOException] on network failures and [HttpException] on non-2xx responses.
+     * [IOException] - network failures
+     * [HttpException] - non-2xx responses.
      */
     private fun execute(request: Request): String {
         val response = httpClient.newCall(request).execute()
         val bodyString = response.body?.string() ?: ""
         if (!response.isSuccessful) {
-            // Parse the API error message if possible, otherwise use HTTP status
+
             val message = try {
                 serializer.fromJson(bodyString, ApiResponseDto::class.java).message
                     ?: "HTTP ${response.code}"
@@ -135,5 +123,5 @@ class PlayerHttpClient(
     }
 }
 
-/** Thrown when the server returns a non-2xx status code. */
+
 class HttpException(val code: Int, message: String) : Exception("HTTP $code: $message")

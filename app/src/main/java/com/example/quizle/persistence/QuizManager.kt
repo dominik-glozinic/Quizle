@@ -38,39 +38,25 @@ class QuizManager(
 ) {
     val host: Host = Host(username = hostUsername, network = network)
 
-    // ── Persistence helpers ───────────────────────────────────────────────────
+    // Persistence functions
 
-    /** Saves a new or updated quiz to the database. */
     fun saveQuiz(quiz: Quiz) = repo.saveQuiz(quiz)
 
-    /** Returns all quizzes stored in the database as domain objects. */
     fun getAllQuizzes(): List<Quiz> = repo.loadAllQuizzes()
 
-    /** Loads a single quiz by id. */
     fun getQuiz(quizId: String): Quiz = repo.loadQuiz(quizId)
 
-    /** Deletes a quiz from the database. */
     fun deleteQuiz(quiz: Quiz) = repo.removeQuiz(quiz)
 
-    // ── Session lifecycle ─────────────────────────────────────────────────────
+    // Session only functions
 
-    /**
-     * Loads the quiz from the DB and creates a session, starting the HTTP server.
-     * Returns the join URL players should connect to.
-     */
     fun startSessionFor(quizId: String, hostIp: String, port: Int = 8888): String {
         val quiz = repo.loadQuiz(quizId)
         val session = host.createSession(quiz, hostIp, port)
         return session.getJoinUrl()
     }
 
-    /**
-     * Advances to the next question and broadcasts it.
-     * Returns the question text/answers for the UI to display, or null when the
-     * game is finished (leaderboard has already been broadcast automatically).
-     */
     fun advanceQuestion() = host.advanceToNextQuestion()
 
-    /** Stops the server and tears down the session. */
     fun endSession() = host.endSession()
 }

@@ -5,9 +5,6 @@ import com.google.gson.GsonBuilder
 
 /**
  * JSON serializer/deserializer for all network messages.
- *
- * Dependency (build.gradle):
- *   implementation("com.google.code.gson:gson:2.10.1")
  */
 class MessageSerializer {
 

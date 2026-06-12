@@ -25,7 +25,7 @@ class NetworkIntegrationTest {
     fun testNetworkIntegration() {
         println("=== Quizle Network Integration Test ===\n")
 
-    // ── 1. Build a sample quiz ────────────────────────────────────────────────
+    // 1. Build a sample quiz
     val quiz = Quiz(title = "Geography Quiz")
     quiz.addQuestion(
         Question(
@@ -57,7 +57,7 @@ class NetworkIntegrationTest {
     )
     println("[OK] Quiz built: '${quiz.title}' with ${quiz.getQuestions().size} questions")
 
-    // ── 2. Host creates and starts a session ──────────────────────────────────
+    // 2. Host creates and starts a session
     val server = LocalHttpServer(port = 8888)
     val host = Host(username = "HostUser", network = server)
     val session = host.createSession(quiz)
@@ -65,19 +65,19 @@ class NetworkIntegrationTest {
 
     Thread.sleep(200) // give NanoHTTPD a moment to bind
 
-    // ── 3. Player joins ───────────────────────────────────────────────────────
+    // 3. Player joins
     val client = PlayerHttpClient(serverUrl = "http://127.0.0.1:8888")
     val joinResult = client.join(url = "http://127.0.0.1:8888", username = "Domy")
     check(joinResult.isSuccess) { "join() failed: ${joinResult.exceptionOrNull()}" }
     val player = joinResult.getOrThrow()
     println("[OK] Player joined: id=${player.userId}, username=${player.getUsername()}")
 
-    // ── 4. Host advances to question 1 ────────────────────────────────────────
+    // 4. Host advances to question 1
     val q1 = session.advance()!!
     server.broadcastQuestion(q1)
     println("[OK] Host broadcast question 1: '${q1.getText()}'")
 
-    // ── 5. Player polls and sees the question ─────────────────────────────────
+    // 5. Player polls and sees the question
     Thread.sleep(100)
     val pollResult = client.pollGameState()
     check(pollResult.isSuccess) { "pollGameState() failed: ${pollResult.exceptionOrNull()}" }
@@ -87,26 +87,26 @@ class NetworkIntegrationTest {
     }
     println("[OK] Player polled state: ${gameState.state}, question='${gameState.currentQuestion?.getText()}'")
 
-    // ── 6. Player submits a correct answer ────────────────────────────────────
-    Thread.sleep(500) // simulate thinking time
+    //6. Player submits a correct answer
+    Thread.sleep(500)
     val answerResult = client.submitAnswer(questionId = "q1", answerId = "a3")
     check(answerResult.isSuccess) { "submitAnswer() failed: ${answerResult.exceptionOrNull()}" }
     println("[OK] Player submitted answer a3 (correct)")
 
-    // ── 7. Host advances to question 2, player answers incorrectly ────────────
+    //7. Host advances to question 2, player answers incorrectly
     val q2 = session.advance()!!
     server.broadcastQuestion(q2)
     Thread.sleep(100)
     client.submitAnswer(questionId = "q2", answerId = "b3") // wrong answer
     println("[OK] Player submitted answer b3 (wrong)")
 
-    // ── 8. Host finishes the game and builds the leaderboard ──────────────────
-    session.advance() // advances past last question → state = FINISHED
+    // 8. Host finishes the game and builds the leaderboard
+    session.advance() // advances past last question -> state = finished
     val leaderboard = ScoringService().buildLeaderboard(session, session.getAnswers())
     server.broadcastLeaderboard(leaderboard)
     println("[OK] Leaderboard broadcast")
 
-    // ── 9. Player fetches leaderboard ─────────────────────────────────────────
+    // 9. Player fetches leaderboard
     Thread.sleep(100)
     val lbResult = client.fetchLeaderboard()
     check(lbResult.isSuccess) { "fetchLeaderboard() failed: ${lbResult.exceptionOrNull()}" }
@@ -118,7 +118,7 @@ class NetworkIntegrationTest {
     check(lb.getWinner().username == "Domy") { "Expected Domy to win" }
     check(lb.getWinner().score > 0) { "Winner should have more than 0 points" }
 
-    // ── 10. Cleanup ───────────────────────────────────────────────────────────
+    // 10. Cleanup
     server.stopServer()
     println("\n[OK] Server stopped — all checks passed ✓")
 }

@@ -1,4 +1,4 @@
-package com.example.quizle
+package com.example.quizle.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.quizle.R
 import com.example.quizle.persistence.QuizDatabase
 import com.example.quizle.persistence.QuizRepositoryImpl
 

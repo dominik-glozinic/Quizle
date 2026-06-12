@@ -1,4 +1,4 @@
-package com.example.quizle
+package com.example.quizle.ui
 
 import android.os.Bundle
 import android.os.Handler
@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.quizle.R
 import com.example.quizle.logic.GameSession
 import com.example.quizle.logic.Host
 import com.example.quizle.network.LocalHttpServer

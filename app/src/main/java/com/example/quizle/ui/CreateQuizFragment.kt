@@ -1,4 +1,4 @@
-package com.example.quizle
+package com.example.quizle.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.quizle.R
 import com.example.quizle.logic.Question
 import com.example.quizle.logic.Quiz
 import com.example.quizle.persistence.QuizDatabase
@@ -20,7 +21,7 @@ class CreateQuizFragment : Fragment() {
 
     private val questions = mutableListOf<Question>()
     private lateinit var adapter: QuestionAdapter
-    // If editing an existing quiz, its ID is passed as an argument
+    // Note: If editing an existing quiz, its ID is passed as an argument
     private var editingQuizId: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
@@ -40,7 +41,7 @@ class CreateQuizFragment : Fragment() {
         )
         recycler.adapter = adapter
 
-        // Listen for a new/edited question coming back from AddQuestionFragment
+
         findNavController()
             .currentBackStackEntry
             ?.savedStateHandle

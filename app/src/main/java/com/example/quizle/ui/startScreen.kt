@@ -1,4 +1,4 @@
-package com.example.quizle
+package com.example.quizle.ui
 import androidx.navigation.fragment.findNavController
 
 
@@ -7,6 +7,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import com.example.quizle.R
+
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
@@ -39,11 +42,11 @@ class startScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<android.widget.Button>(R.id.hostButton).setOnClickListener {
+        view.findViewById<Button>(R.id.hostButton).setOnClickListener {
             findNavController().navigate(R.id.action_startScreen_to_quizList)
         }
 
-        view.findViewById<android.widget.Button>(R.id.userButton).setOnClickListener {
+        view.findViewById<Button>(R.id.userButton).setOnClickListener {
             findNavController().navigate(R.id.action_startScreen_to_join)
         }
     }

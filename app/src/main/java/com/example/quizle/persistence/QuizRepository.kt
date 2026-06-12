@@ -21,7 +21,7 @@ class QuizRepositoryImpl(
 
     private val gson = Gson()
 
-    // ── QuizRepository delegation ─────────────────────────────────────────────
+    // QuizRepository delegation
 
     override fun insertQuiz(quiz: QuizEntity) = dao.insertQuiz(quiz)
     override fun getAllQuizzes(): List<QuizEntity> = dao.getAllQuizzes()
@@ -30,12 +30,7 @@ class QuizRepositoryImpl(
     override fun insertQuestions(questions: List<QuestionEntity>) = dao.insertQuestions(questions)
     override fun getQuestionsForQuiz(quizId: String): List<QuestionEntity> = dao.getQuestionsForQuiz(quizId)
 
-    // ── Convenience: load a full Quiz in one call ─────────────────────────────
 
-    /**
-     * Loads a [Quiz] domain object by id, fetching its questions in one go.
-     * Use this instead of calling [getQuizById] + [getQuestionsForQuiz] manually.
-     */
     fun loadQuiz(quizId: String): Quiz {
         val entity = dao.getQuizById(quizId)
         val questionEntities = dao.getQuestionsForQuiz(quizId)
@@ -52,19 +47,14 @@ class QuizRepositoryImpl(
         }
     }
 
-    /**
-     * Persists a [Quiz] domain object (quiz row + all question rows) atomically.
-     * Existing rows with the same id are replaced (REPLACE conflict strategy on DAO).
-     */
+
     fun saveQuiz(quiz: Quiz) {
         val (quizEntity, questionEntities) = fromQuiz(quiz)
         dao.insertQuiz(quizEntity)
         dao.insertQuestions(questionEntities)
     }
 
-    /**
-     * Deletes a [Quiz] and all its questions from the database.
-     */
+
     fun removeQuiz(quiz: Quiz) {
         // Questions must be deleted first — Room has no FK cascade unless explicitly configured.
         dao.deleteQuestionsByQuizId(quiz.quizId)
@@ -76,14 +66,7 @@ class QuizRepositoryImpl(
         ))
     }
 
-    // ── Mapping ───────────────────────────────────────────────────────────────
 
-    /**
-     * Maps a [QuizEntity] + its [QuestionEntity] rows to a [Quiz] domain object.
-     *
-     * The `answers` column in [QuestionEntity] is a JSON string (List<Answer>),
-     * serialised by [fromQuiz] below.
-     */
     fun toQuiz(entity: QuizEntity, questions: List<QuestionEntity>): Quiz {
         val answerListType = object : TypeToken<List<Answer>>() {}.type
 
@@ -107,12 +90,7 @@ class QuizRepositoryImpl(
         return quiz
     }
 
-    /**
-     * Maps a [Quiz] domain object to a [QuizEntity] + [List<QuestionEntity>] pair
-     * ready for Room insertion.
-     *
-     * Each question's answers list is serialised to a JSON string.
-     */
+
     fun fromQuiz(quiz: Quiz): Pair<QuizEntity, List<QuestionEntity>> {
         val quizEntity = QuizEntity(
             id = quiz.quizId,

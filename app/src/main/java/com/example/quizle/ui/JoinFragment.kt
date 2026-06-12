@@ -1,4 +1,4 @@
-package com.example.quizle
+package com.example.quizle.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.quizle.R
 
 class JoinFragment : Fragment() {
 

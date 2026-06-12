@@ -14,8 +14,8 @@ data class QuizEntity(
 @Entity(tableName = "questions")
 data class QuestionEntity(
     @PrimaryKey val questionId: String,
-    val quizId: String,          // FK → QuizEntity.id
+    val quizId: String,
     val questionText: String,
     val timerSeconds: Int,
-    val answers: String          // JSON-serialised List<Answer>
+    val answers: String
 )

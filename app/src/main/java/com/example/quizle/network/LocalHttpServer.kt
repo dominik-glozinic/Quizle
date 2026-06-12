@@ -7,11 +7,8 @@ import java.io.IOException
 /**
  * HTTP server running on the host device (LAN).
  *
- * Dependency (build.gradle):
- *   implementation("org.nanohttpd:nanohttpd:2.3.1")
+ * MEthod Map:
  *
- * Endpoints
- * ─────────
  *  POST /join        body: { "username": "..." }
  *                    → 200 { Player JSON } | 400 on bad input | 409 if session not WAITING
  *
@@ -33,13 +30,13 @@ class LocalHttpServer(
     // NanoHTTPD inner server
     private var nano: NanoHTTPD? = null
 
-    // Volatile state shared between the server thread and the host UI thread
+    // Volatile state shared between server thread andhost UI thread
     @Volatile private var currentGameState: GameStateDto =
         GameStateDto(state = GameState.WAITING.name, currentQuestion = null, questionOpenedAtMs = null)
 
     @Volatile private var currentLeaderboard: Leaderboard? = null
 
-    // ── IHostNetwork ────────────────────────────────────────────────────────
+    // IHostNetwork
 
     override fun startServer(session: GameSession) {
         this.session = session
@@ -68,7 +65,7 @@ class LocalHttpServer(
         nano = null
     }
 
-    /** Called by the host when advancing to the next question. */
+    /** advancing to the next question. */
     override fun broadcastQuestion(q: Question) {
         currentGameState = GameStateDto(
             state = GameState.ACTIVE.name,
@@ -77,14 +74,13 @@ class LocalHttpServer(
         )
     }
 
-    /** Called by the host when the game finishes and results are ready. */
+    /** game finishes AND results are ready. */
     override fun broadcastLeaderboard(lb: Leaderboard) {
         currentLeaderboard = lb
-        // Keep the last question visible but mark state as FINISHED
         currentGameState = currentGameState.copy(state = GameState.FINISHED.name)
     }
 
-    // ── Routing ─────────────────────────────────────────────────────────────
+    //Routing
 
     private fun route(req: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         val uri = req.uri.trimEnd('/')
@@ -101,7 +97,7 @@ class LocalHttpServer(
         }
     }
 
-    // ── Handlers ─────────────────────────────────────────────────────────────
+    // Handlers
 
     private fun handleJoin(req: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         val body = readBody(req)
@@ -154,7 +150,7 @@ class LocalHttpServer(
         return okResponse(lb)
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // Helpers 2
 
     private fun okResponse(obj: Any): NanoHTTPD.Response =
         NanoHTTPD.newFixedLengthResponse(
@@ -170,7 +166,7 @@ class LocalHttpServer(
             serializer.toJson(ApiResponseDto(success = false, message = msg))
         )
 
-    /** Reads the entire request body as a UTF-8 string. */
+    /** Reads request body as a UTF-8 string. */
     private fun readBody(req: NanoHTTPD.IHTTPSession): String {
         val files = HashMap<String, String>()
         return try {

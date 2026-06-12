@@ -1,13 +1,8 @@
 package com.example.quizle.logic
 
 /**
- * Represents the quiz host.
- *
- * Host is kept pure logic — it knows nothing about persistence or Android.
+ * NOTE:
  * Quiz loading/saving is handled by [QuizManager] in the persistence layer.
- *
- * [network] is injected so the Host can drive the server without knowing
- * the concrete implementation (easy to swap / mock in tests).
  */
 class Host(
     username: String,
@@ -18,15 +13,12 @@ class Host(
     // The session is created once per game and lives until the game ends.
     private var activeSession: GameSession? = null
 
-    // ── Session lifecycle ─────────────────────────────────────────────────────
+    // Session lifecycle
 
     /**
-     * Creates a new [GameSession] for the given quiz and starts the HTTP server.
-     * Call this when the host taps "Start Game".
-     *
      * @param quiz      The quiz to play through.
-     * @param hostIp    The LAN IP address of this device (e.g. "192.168.1.42").
-     * @param port      Port to bind (default 8888).
+     * @param hostIp    The LAN IP address of this device
+     * @param port      Port to bind (default 8888, see if change bricks the app).
      */
     fun createSession(quiz: Quiz, hostIp: String = "127.0.0.1", port: Int = 8888): GameSession {
         val session = GameSession(quiz = quiz, hostIpAddress = hostIp, port = port)
@@ -37,7 +29,7 @@ class Host(
 
     /**
      * Advances to the next question and broadcasts it to all connected players.
-     * Returns the new current [Question], or null if the quiz is now finished.
+     * Returns the new current Question, or null if the quiz is now finished.
      */
     fun advanceToNextQuestion(): Question? {
         val session = requireSession()
@@ -58,7 +50,6 @@ class Host(
         activeSession = null
     }
 
-    // ── Convenience accessors ─────────────────────────────────────────────────
 
     fun getActiveSession(): GameSession = requireSession()
 
@@ -69,7 +60,6 @@ class Host(
         return ScoringService().buildLeaderboard(session, session.getAnswers())
     }
 
-    // ── Internal ──────────────────────────────────────────────────────────────
 
     private fun requireSession(): GameSession =
         activeSession ?: throw IllegalStateException(

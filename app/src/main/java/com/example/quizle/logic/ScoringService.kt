@@ -3,13 +3,8 @@ package com.example.quizle.logic
 /**
  * Calculates points for a single answer and builds the final leaderboard.
  *
- * Scoring model (matches the design decision in Systementscheidungen):
- *  - Only correct answers score points.
- *  - The faster the answer relative to the question's time limit, the more points.
- *  - Score scales linearly between MIN_POINTS and MAX_POINTS.
- *
- *  formula:  points = MAX_POINTS - (elapsed / timerMs) * (MAX_POINTS - MIN_POINTS)
- *            clamped to [MIN_POINTS, MAX_POINTS]
+ *  Scoring formula:  points = MAX_POINTS - (elapsed / timerMs) * (MAX_POINTS - MIN_POINTS)
+ *            clamped to [MIN_POINTS, MAX_POINTS] ---> Doesn't really work atm
  */
 class ScoringService {
 

@@ -5,9 +5,9 @@ import com.example.quizle.logic.Question
 /**
  * Snapshot of the current game state sent to players via GET /poll.
  *
- * [state]               - one of the GameState enum names: WAITING, ACTIVE, PAUSED, FINISHED
+ * [state]               - GameState, e.g: WAITING, ACTIVE, PAUSED, FINISHED
  * [currentQuestion]     - the active question (null if WAITING or FINISHED)
- * [questionOpenedAtMs]  - epoch-ms when the host opened the current question (used for scoring)
+ * [questionOpenedAtMs]  - ms when the host opened the current question
  */
 data class GameStateDto(
     val state: String,
@@ -16,14 +16,14 @@ data class GameStateDto(
 )
 
 /**
- * Request body sent by the player on POST /join.
+ * Request body sent by player on POST /join.
  */
 data class JoinRequestDto(
     val username: String
 )
 
 /**
- * Request body sent by the player on POST /answer.
+ * Request body sent by player on POST /answer.
  */
 data class SubmitAnswerRequestDto(
     val questionId: String,
@@ -31,7 +31,7 @@ data class SubmitAnswerRequestDto(
 )
 
 /**
- * Generic JSON envelope for simple success/error responses.
+ * JSON envelope for success/error responses.
  */
 data class ApiResponseDto(
     val success: Boolean,

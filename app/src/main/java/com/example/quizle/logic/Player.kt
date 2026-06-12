@@ -22,19 +22,17 @@ class Player(
     @Transient private val network: IPlayerNetwork = StubPlayerNetwork()
 ) : User(userId = userId, username = username) {
 
-    // ── IPlayerNetwork delegation ─────────────────────────────────────────────
 
     /**
      * POST /join — registers this player on the host server.
-     * On success the returned [Player] carries the server-assigned userId.
      */
     fun joinSession(url: String, username: String): Result<Player> =
         network.join(url, username)
 
     /**
      * GET /poll — returns the current question if the game is ACTIVE, or null
-     * if still WAITING.  Returns a failure if the session is FINISHED so the
-     * caller knows to switch to [viewFinalScores].
+     * if still WAITING.  (NOTE: Returns a failure if the session is FINISHED so the
+     * caller knows to switch to [viewFinalScores])
      */
     fun pollForQuestion(): Result<Question?> = runCatching {
         val dto = network.pollGameState().getOrThrow()
@@ -46,7 +44,7 @@ class Player(
     }
 
     /**
-     * POST /answer — submits the player's chosen answer for the active question.
+     * POST /answer — submits the players chosen answer for the active question.
      */
     fun submitAnswer(questionId: String, answerId: String): Result<Unit> =
         network.submitAnswer(questionId, answerId)
@@ -58,5 +56,5 @@ class Player(
         network.fetchLeaderboard()
 }
 
-/** Thrown by [Player.pollForQuestion] when the server signals FINISHED. */
+/** when server signals FINISHED. */
 class GameFinishedException(message: String) : Exception(message)
