@@ -1,0 +1,154 @@
+@startuml Darstellung
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classBackgroundColor #F8F8F8
+skinparam classBorderColor #888888
+skinparam arrowColor #555555
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+
+package "Darstellung" #add8e6c8 {
+
+  abstract class User {
+    - userId: String
+    - username: String
+    --
+    + getUsername(): String
+    + setUsername(name: String)
+  }
+
+  class Host {
+    - roomCode: String
+    --
+    + createSession(quiz: Quiz): GameSession
+    + startSession(sessionId: String)
+    + advanceToNextQuestion(sessionId: String)
+    + viewAnswers(): List<PlayerAnswer>
+    + displayResults(): Leaderboard
+  }
+
+  class Player {
+    --
+    + joinSession(url: String, username: String): Result<Player>
+    + pollForQuestion(): Result<Question?>
+    + submitAnswer(questionId: String, answerId: String): Result<Unit>
+    + viewFinalScores(): Result<Leaderboard>
+  }
+
+  class Quiz {
+    - quizId: String
+    - title: String
+    - description: String
+    --
+    + getQuestions(): List<Question>
+    + addQuestion(q: Question)
+  }
+
+  class GameSession {
+    + sessionId: String
+    + hostIpAddress: String
+    + port: Int
+    + state: GameState
+    + currentQuestionIndex: Int
+    + startedAt: Long?
+    --
+    + getJoinUrl(): String
+    + getCurrentQuestion(): Question?
+    + advance()
+    + isFinished(): Boolean
+  }
+
+  class Question {
+    - questionId: String
+    - quizId: String
+    - questionText: String
+    - timerSeconds: Int
+    --
+    + getText(): String
+    + getAnswers(): List<Answer>
+    + isCorrect(answerId: String): Boolean
+    + getTimeLimitSec(): Int
+  }
+
+  class Answer {
+    - answerId: String
+    - answerText: String
+    - isCorrect: Boolean
+    --
+    + getText(): String
+    + isCorrectAnswer(): Boolean
+  }
+
+  class PlayerAnswer {
+    - playerId: String
+    - questionId: String
+    - answerId: String
+    - answeredAtMs: Long
+    --
+    + isCorrect(): Boolean
+    + getTimestamp(): Long
+  }
+
+  class Leaderboard {
+    - entries: List<LeaderboardEntry>
+    --
+    + getRanking(): List<LeaderboardEntry>
+    + getWinner(): LeaderboardEntry
+  }
+
+  class LeaderboardEntry {
+    + playerId: String
+    + username: String
+    + score: Int
+  }
+
+  class ScoringService {
+    + MAX_POINTS: Int
+    + MIN_POINTS: Int
+    --
+    + calculatePoints(answeredAtMs: Long, questionOpenedAtMs: Long, timerSeconds: Int, isCorrect: Boolean): Int
+    + buildLeaderboard(session: GameSession, answers: List<PlayerAnswer>): Leaderboard
+  }
+
+  enum GameState {
+    WAITING
+    ACTIVE
+    PAUSED
+    FINISHED
+  }
+
+  interface IHostNetwork {
+    + startServer(session: GameSession)
+    + stopServer()
+    + broadcastQuestion(q: Question)
+    + broadcastLeaderboard(lb: Leaderboard)
+  }
+
+  interface IPlayerNetwork {
+    + join(url: String, username: String): Result<Player>
+    + pollGameState(): Result<GameStateDto>
+    + submitAnswer(questionId: String, answerId: String): Result<Unit>
+    + fetchLeaderboard(): Result<Leaderboard>
+  }
+}
+
+' Inheritance
+User <|-- Host
+User <|-- Player
+
+' Domain associations
+Host ..> GameSession : creates
+Player ..> PlayerAnswer : submits
+Quiz "1" o-- "1..*" Question
+Question "1" o-- "4" Answer
+GameSession "1" o-- "0..*" PlayerAnswer
+GameSession --> GameState : uses
+
+' Services
+Host ..> IHostNetwork : uses
+Player ..> IPlayerNetwork : uses
+GameSession ..> ScoringService : uses
+ScoringService ..> Leaderboard : generates
+Leaderboard *-- LeaderboardEntry : contains
+@enduml

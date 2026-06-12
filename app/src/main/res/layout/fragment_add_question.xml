@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/etQuestion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Question text"
+            android:minLines="2"
+            android:inputType="textMultiLine" />
+
+        <!-- Repeat this block 4 times with ids answer1..4 / correct1..4 -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="16dp">
+            <RadioButton android:id="@+id/rbCorrect1" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <EditText android:id="@+id/etAnswer1" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:hint="Answer 1" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="8dp">
+            <RadioButton android:id="@+id/rbCorrect2" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <EditText android:id="@+id/etAnswer2" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:hint="Answer 2" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="8dp">
+            <RadioButton android:id="@+id/rbCorrect3" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <EditText android:id="@+id/etAnswer3" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:hint="Answer 3" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="8dp">
+            <RadioButton android:id="@+id/rbCorrect4" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <EditText android:id="@+id/etAnswer4" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:hint="Answer 4" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="24dp">
+            <Button android:id="@+id/btnCancelQuestion" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="Cancel" android:layout_marginEnd="8dp" />
+            <Button android:id="@+id/btnSaveQuestion" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="Save Question" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

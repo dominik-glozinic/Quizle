@@ -1,8 +1,17 @@
 package com.example.quizle.logic
 
-object ScoringService {
-    const val MAX_POINTS = 1000
-    const val MIN_POINTS = 100
+/**
+ * Calculates points for a single answer and builds the final leaderboard.
+ *
+ *  Scoring formula:  points = MAX_POINTS - (elapsed / timerMs) * (MAX_POINTS - MIN_POINTS)
+ *            clamped to [MIN_POINTS, MAX_POINTS] ---> Doesn't really work atm
+ */
+class ScoringService {
+
+    companion object {
+        const val MAX_POINTS = 1000
+        const val MIN_POINTS = 100
+    }
 
     fun calculatePoints(
         answeredAtMs: Long,
@@ -10,10 +19,48 @@ object ScoringService {
         timerSeconds: Int,
         isCorrect: Boolean
     ): Int {
-        TODO("Not yet implemented")
+        if (!isCorrect) return 0
+
+        val elapsedMs = (answeredAtMs - questionOpenedAtMs).coerceAtLeast(0)
+        val timerMs = timerSeconds * 1000L
+
+        // If somehow answered after the timer expired, award minimum points anyway
+        if (elapsedMs >= timerMs) return MIN_POINTS
+
+        val ratio = elapsedMs.toDouble() / timerMs.toDouble()
+        val points = MAX_POINTS - (ratio * (MAX_POINTS - MIN_POINTS))
+        return points.toInt().coerceIn(MIN_POINTS, MAX_POINTS)
     }
 
     fun buildLeaderboard(session: GameSession, answers: List<PlayerAnswer>): Leaderboard {
-        TODO("Not yet implemented")
+        val quiz = session.quiz
+        val questionOpenedTimes = session.questionOpenedTimestamps
+
+        // Map playerId -> total score
+        val scoreMap = mutableMapOf<String, Int>()
+
+        for (answer in answers) {
+            val question = quiz.getQuestions().find { it.questionId == answer.questionId }
+                ?: continue
+            val openedAt = questionOpenedTimes[answer.questionId] ?: continue
+
+            val pts = calculatePoints(
+                answeredAtMs = answer.answeredAtMs,
+                questionOpenedAtMs = openedAt,
+                timerSeconds = question.getTimeLimitSec(),
+                isCorrect = question.isCorrect(answer.answerId)
+            )
+            scoreMap[answer.playerId] = (scoreMap[answer.playerId] ?: 0) + pts
+        }
+
+        val entries = session.getPlayers().map { player ->
+            LeaderboardEntry(
+                playerId = player.userId,
+                username = player.getUsername(),
+                score = scoreMap[player.userId] ?: 0
+            )
+        }
+
+        return Leaderboard(entries)
     }
 }

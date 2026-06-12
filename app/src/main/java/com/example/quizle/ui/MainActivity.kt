@@ -1,12 +1,20 @@
-package com.example.quizle
+package com.example.quizle.ui
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.quizle.R
+import com.example.quizle.logic.GameSession
+import com.example.quizle.network.LocalHttpServer
 
 class MainActivity : AppCompatActivity() {
+    
+    // Shared instances for the host
+    var currentSession: GameSession? = null
+    var server: LocalHttpServer? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

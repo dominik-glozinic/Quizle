@@ -1,10 +1,13 @@
 package com.example.quizle.logic
 
-class Answer(
-    private val answerId: String,
-    private val answerText: String,
-    private val isCorrect: Boolean
-) {
+import java.io.Serializable
+
+data class Answer(
+    val answerId: String,
+    val answerText: String,
+    val isCorrect: Boolean
+) : Serializable {
     fun getText(): String = answerText
     fun isCorrectAnswer(): Boolean = isCorrect
 }
+

@@ -22,4 +22,7 @@ interface RoomQuizDao {
 
     @Query("SELECT * FROM questions WHERE quizId = :quizId")
     fun getQuestionsForQuiz(quizId: String): List<QuestionEntity>
+
+    @Query("DELETE FROM questions WHERE quizId = :quizId")
+    fun deleteQuestionsByQuizId(quizId: String)
 }

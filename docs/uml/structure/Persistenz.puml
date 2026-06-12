@@ -1,0 +1,98 @@
+@startuml persistenz
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classBackgroundColor #F8F8F8
+skinparam classBorderColor #888888
+skinparam arrowColor #555555
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+package "Persistenz" #f5deb3c8 {
+
+  class QuizDatabase <<@Database>> {
+    + getInstance(context: Context): QuizDatabase
+    --
+    + quizDao(): RoomQuizDao
+  }
+
+  interface QuizRepository {
+    + insertQuiz(quiz: QuizEntity)
+    + getAllQuizzes(): List<QuizEntity>
+    + getQuizById(id: String): QuizEntity
+    + deleteQuiz(quiz: QuizEntity)
+    + insertQuestions(questions: List<QuestionEntity>)
+    + getQuestionsForQuiz(quizId: String): List<QuestionEntity>
+  }
+
+  class RoomQuizDao <<@Dao>> {
+    + insertQuiz(quiz: QuizEntity)
+    + getAllQuizzes(): List<QuizEntity>
+    + getQuizById(id: String): QuizEntity
+    + deleteQuiz(quiz: QuizEntity)
+    + insertQuestions(questions: List<QuestionEntity>)
+    + getQuestionsForQuiz(quizId: String): List<QuestionEntity>
+  }
+
+  class QuizEntity <<@Entity>> {
+    + id: String <<@PrimaryKey>>
+    + title: String
+    + description: String
+    + createdAt: Long
+  }
+
+  class QuestionEntity <<@Entity>> {
+    + questionId: String <<@PrimaryKey>>
+    + quizId: String <<FK>>
+    + questionText: String
+    + timerSeconds: Int
+    + answers: String
+    ' answers stored as JSON string (List<Answer>)
+  }
+
+  class QuizRepositoryImpl {
+    - dao: RoomQuizDao
+    --
+    + insertQuiz(quiz: QuizEntity)
+    + getAllQuizzes(): List<QuizEntity>
+    + getQuizById(id: String): QuizEntity
+    + deleteQuiz(quiz: QuizEntity)
+    + insertQuestions(questions: List<QuestionEntity>)
+    + getQuestionsForQuiz(quizId: String): List<QuestionEntity>
+    + toQuiz(entity: QuizEntity, questions: List<QuestionEntity>): Quiz
+    + fromQuiz(quiz: Quiz): Pair<QuizEntity, List<QuestionEntity>>
+  }
+
+  QuizRepositoryImpl ..|> QuizRepository : implements
+  QuizRepositoryImpl --> RoomQuizDao : delegates to
+  QuizDatabase --> RoomQuizDao : provides
+  RoomQuizDao --> QuizEntity : reads/writes
+  RoomQuizDao --> QuestionEntity : reads/writes
+}
+
+class Host {
+    - roomCode: String
+    --
+    + createSession(quiz: Quiz): GameSession
+    + startSession(sessionId: String)
+    + advanceToNextQuestion(sessionId: String)
+    + viewAnswers(): List<PlayerAnswer>
+    + displayResults(): Leaderboard
+  }
+
+  class Quiz {
+    - quizId: String
+    - title: String
+    - description: String
+    --
+    + getQuestions(): List<Question>
+    + addQuestion(q: Question)
+  }
+
+  ' Persistence <-> Domain bridge
+QuizRepositoryImpl ..> Quiz : maps to/from
+QuizRepositoryImpl ..> QuizEntity : maps to/from
+QuizRepositoryImpl ..> QuestionEntity : maps to/from
+Host ..> QuizRepository : loads quiz via
+Quiz ..> QuizRepository : saved/loaded by
+@enduml
