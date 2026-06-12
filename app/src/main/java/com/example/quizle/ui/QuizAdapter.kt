@@ -12,13 +12,13 @@ import com.example.quizle.logic.Quiz
 class QuizAdapter(
     private val items: List<Quiz>,
     private val onHost: (Quiz) -> Unit,
-    private val onDelete: (Quiz) -> Unit
+    private val onEdit: (Quiz) -> Unit
 ) : RecyclerView.Adapter<QuizAdapter.VH>() {
 
     inner class VH(v: View) : RecyclerView.ViewHolder(v) {
         val title: TextView = v.findViewById(R.id.tvQuizTitle)
         val btnHost: Button = v.findViewById(R.id.btnHost)
-        val btnDelete: Button = v.findViewById(R.id.btnDelete)
+        val btnEdit: Button = v.findViewById(R.id.btnEdit)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -30,6 +30,6 @@ class QuizAdapter(
         val quiz = items[position]
         holder.title.text = quiz.title
         holder.btnHost.setOnClickListener { onHost(quiz) }
-        holder.btnDelete.setOnClickListener { onDelete(quiz) }
+        holder.btnEdit.setOnClickListener { onEdit(quiz) }
     }
 }

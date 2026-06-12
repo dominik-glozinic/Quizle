@@ -28,7 +28,25 @@ class CreateQuizFragment : Fragment() {
         inflater.inflate(R.layout.fragment_create_quiz, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val db = QuizDatabase.getInstance(requireContext())
+        val repo = QuizRepositoryImpl(db.quizDao())
+        
         editingQuizId = arguments?.getString("quizId")
+
+        editingQuizId?.let { id ->
+            repo.loadQuiz(id).let { quiz ->
+                view.findViewById<EditText>(R.id.etQuizTitle).setText(quiz.title)
+                questions.clear()
+                questions.addAll(quiz.getQuestions())
+                
+                val btnDeleteQuiz = view.findViewById<Button>(R.id.btnDeleteQuiz)
+                btnDeleteQuiz.visibility = View.VISIBLE
+                btnDeleteQuiz.setOnClickListener {
+                    repo.removeQuiz(quiz)
+                    findNavController().popBackStack()
+                }
+            }
+        }
 
         val recycler = view.findViewById<RecyclerView>(R.id.recyclerViewQuestions)
         recycler.layoutManager = LinearLayoutManager(requireContext())
@@ -37,6 +55,10 @@ class CreateQuizFragment : Fragment() {
                 // Navigate to edit screen, passing question data
                 val bundle = Bundle().apply { putSerializable("question", question) }
                 findNavController().navigate(R.id.action_createQuiz_to_addQuestion, bundle)
+            },
+            onDelete = { question ->
+                questions.remove(question)
+                adapter.notifyDataSetChanged()
             }
         )
         recycler.adapter = adapter
@@ -65,8 +87,8 @@ class CreateQuizFragment : Fragment() {
             if (title.isEmpty()) { /* show error */ return@setOnClickListener }
             val quiz = Quiz(quizId = editingQuizId ?: UUID.randomUUID().toString(), title = title)
             questions.forEach { quiz.addQuestion(it) }
-            val db = QuizDatabase.getInstance(requireContext())
-            QuizRepositoryImpl(db.quizDao()).saveQuiz(quiz)
+            val dbSave = QuizDatabase.getInstance(requireContext())
+            QuizRepositoryImpl(dbSave.quizDao()).saveQuiz(quiz)
             findNavController().popBackStack(R.id.quizListFragment, false)
         }
     }

@@ -22,6 +22,7 @@ class PlayerGameFragment : Fragment() {
     private var client: PlayerHttpClient? = null
     private var currentQuestionId: String? = null
     private var hasAnswered = false
+    private var currentQuestion: com.example.quizle.logic.Question? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_player_game, container, false)
@@ -50,6 +51,7 @@ class PlayerGameFragment : Fragment() {
             activity?.runOnUiThread {
                 if (result?.isSuccess == true) {
                     val stateDto = result.getOrThrow()
+                    currentQuestion = stateDto.currentQuestion
                     updateUi(stateDto.state, stateDto.currentQuestion?.questionText, stateDto.currentQuestion?.getAnswers()?.map { it.answerId to it.answerText }, stateDto.currentQuestion?.questionId)
                     
                     if (stateDto.state == GameState.FINISHED.name) {
@@ -71,6 +73,7 @@ class PlayerGameFragment : Fragment() {
             currentQuestionId = qId
             hasAnswered = false
             enableButtons(true)
+            view?.findViewById<TextView>(R.id.tvFeedback)?.visibility = View.GONE
         }
 
         if (qText != null && tvQuestion?.text != qText) {
@@ -100,8 +103,17 @@ class PlayerGameFragment : Fragment() {
         if (hasAnswered) return
         hasAnswered = true
         enableButtons(false)
-        
+
+        val q = currentQuestion
         val qId = currentQuestionId ?: return
+        
+        // Show feedback
+        val tvFeedback = view?.findViewById<TextView>(R.id.tvFeedback)
+        val chosenAnswer = q?.getAnswers()?.find { it.answerId == answerId }?.answerText ?: "?"
+        val correctAnswer = q?.getAnswers()?.find { it.isCorrect }?.answerText ?: "?"
+        tvFeedback?.text = "You chose: $chosenAnswer. Correct Answer is: $correctAnswer"
+        tvFeedback?.visibility = View.VISIBLE
+
         thread {
             val result = client?.submitAnswer(qId, answerId)
             activity?.runOnUiThread {

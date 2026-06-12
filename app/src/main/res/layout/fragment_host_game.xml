@@ -24,6 +24,14 @@
         android:text="Players connected: 0"
         android:layout_marginBottom="16dp"/>
 
+    <LinearLayout
+        android:id="@+id/llAnswersContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp"/>
+
     <Button
         android:id="@+id/btnNextQuestion"
         android:layout_width="match_parent"

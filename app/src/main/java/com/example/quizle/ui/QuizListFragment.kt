@@ -33,10 +33,9 @@ class QuizListFragment : Fragment() {
                 val bundle = Bundle().apply { putString("quizId", quiz.quizId) }
                 findNavController().navigate(R.id.action_quizList_to_hostLobby, bundle)
             },
-            onDelete = { quiz ->
-                repo.removeQuiz(quiz)
-                quizzes.remove(quiz)
-                recycler.adapter?.notifyDataSetChanged()
+            onEdit = { quiz ->
+                val bundle = Bundle().apply { putString("quizId", quiz.quizId) }
+                findNavController().navigate(R.id.action_quizList_to_createQuiz, bundle)
             }
         )
 
